@@ -288,8 +288,11 @@ sentence = 'Delete the 5 lowest nodes and add 2 nodes'
 #sentence = 'Add 5 nodes inferior to 6 and superior to 2'
 #sentence = 'Add 5 nodes inferior to 6 and 2 nodes superior to 2'
 #sentence = 'Add 2 nodes between 0 and 10.'
-sentence = 'Add 1 node superiot to 5 and 2 lower than the uppest value'
+#sentence = 'Add 1 node superiot to 5 and 2 lower than the uppest value'
 sentence = 'Add 1 node superior to 2 and 3 nodes inferior to 4.'
+sentence = 'Add 1 node superior to 2 and 3 inferior to 4.'
+#sentence = 'Add the node 10.'
+#sentence = 'Delete 10'
 def get_list_of_translated_sentence(sentence):
     sentence = re.findall(r'\b\w+\b|[.,;!?]', sentence)
     list_of_translated_sentence = []
@@ -335,6 +338,8 @@ def get_list_of_partitionized_translated_sentence(list_of_translated_sentence):
     buffer_range = 0
     for index_element in range(1,len(list_of_translated_sentence)):
         new_element = list_of_translated_sentence[index_element]
+        if (type(old_element) == Number and (type(new_element) == Action or type(new_element) == Number) or index_element == len(list_of_translated_sentence)-1):#Correct this sentence:Add 1 node superior to 2 and 3 inferior to 4.
+            partitionized_translated_sentence.insert(len(partitionized_translated_sentence),KeyWord('nodes',False))
         if type(new_element) == Action:
             buffer_range = 0
             old_action = new_element
@@ -343,6 +348,7 @@ def get_list_of_partitionized_translated_sentence(list_of_translated_sentence):
         elif (type(old_element) == And and type(new_element) == Number and not (buffer_range==1 and old_specification.specification_type == 'range')):#And 34
             list_of_partitionized_translated_sentence.append(partitionized_translated_sentence)
             partitionized_translated_sentence = [old_action, new_element]
+
         else:
             if (type(new_element) == Specification):
                 old_specification = new_element
@@ -387,6 +393,7 @@ def get_list_of_instructions(sentence):#Simple with the following pattern: Actio
 
     
 def print_list_of_partitionized_translated_sentence(list_of_partitionized_translated_sentence):
+    print('\n')
     for list_of_translated_sentence in list_of_partitionized_translated_sentence:
         print(get_human_list_of_translated_sentence(list_of_translated_sentence))
         print('-'*50)
@@ -400,6 +407,7 @@ print(sentence,'\n')
 #list_of_instructions = get_list_of_instructions(sentence)
 #print_list_of_instructions(list_of_instructions)
 list_of_translated_sentence = get_list_of_translated_sentence(sentence)
+print(get_human_list_of_translated_sentence(list_of_translated_sentence))
 list_of_partitionized_translated_sentence = get_list_of_partitionized_translated_sentence(list_of_translated_sentence)
 print_list_of_partitionized_translated_sentence(list_of_partitionized_translated_sentence)
 #print(get_human_list_of_translated_sentence(list_of_translated_sentence))

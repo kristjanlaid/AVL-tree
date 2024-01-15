@@ -93,6 +93,7 @@ def read_instruction(canvas):
             number_of_times = instruction.number_of_times
         else:
             number_of_times = 1
+        print("Number_of_times:",number_of_times)
         list_of_specifications = []
         for specification in instruction.list_of_specifications:
             list_of_specifications.append(specification.specification_type)
@@ -108,8 +109,12 @@ def read_instruction(canvas):
             min_value = 0
             max_value = 999#Max value
             if [] == list_of_specifications:#The default case
-                if list_of_nodes:#There are nodes in list_of_nodes
+                if len(list_of_nodes)>1:#There are nodes in list_of_nodes
                     for number in list_of_nodes:
+                        insert_new_node(canvas,number)
+                elif len(list_of_nodes)==1:#There is only on node in list_of_nodes
+                    number = list_of_nodes[0]
+                    for k in range(number_of_times):
                         insert_new_node(canvas,number)
                 else:#list_of_nodes is emply, I choose a random value
                     for k in range(number_of_times):
@@ -186,13 +191,22 @@ def read_instruction(canvas):
         elif action_type == 'delete':
             min_value = 0
             max_value = 999#Max value
+            list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
             if [] == list_of_specifications:
-                for number in list_of_nodes:
-                    delete_node(canvas, number, True)
+                if len(list_of_nodes) > 1:#There are nodes in list_of_nodes
+                    for number in list_of_nodes:
+                        delete_node(canvas, number, True)
+                elif len(list_of_nodes) == 1:#There is only on node in list_of_nodes
+                    number = list_of_nodes[0]
+                    for k in range(number_of_times):
+                        delete_node(canvas, number, True)
+                else:#list_of_nodes is emply, I choose a random value to delete
+                    for k in range(number_of_times):
+                        number = get_random_number_in_a_list(list_of_numbers)
+                        delete_node(canvas, number, True)
             #Upper
             elif ['upper'] == list_of_specifications:
                 min_value = list_of_nodes[0]
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:#Delete all the nodes superior
                     for number in list_of_numbers:
                         delete_node(canvas, number, True)
@@ -203,7 +217,6 @@ def read_instruction(canvas):
             #Lower  
             elif ['lower'] == list_of_specifications:
                 max_value = list_of_nodes[0]
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:#Delete all the nodes inferior: Delete all nodes inferior to 10.
                     for number in list_of_numbers:
                         delete_node(canvas, number, True)
@@ -225,7 +238,6 @@ def read_instruction(canvas):
             elif (['range'] == list_of_specifications):
                 min_value = list_of_nodes[0]
                 max_value = list_of_nodes[1]
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
 
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:
                     for number in list_of_numbers:
@@ -243,7 +255,6 @@ def read_instruction(canvas):
                         index_min_value = index_specification
                 min_value = list_of_nodes[index_min_value]
                 max_value = list_of_nodes[index_max_value]
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:
                     for number in list_of_numbers:
                         delete_node(canvas, number, True)
@@ -254,7 +265,6 @@ def read_instruction(canvas):
             #Min upper
             elif 'upper' in list_of_specifications and 'lowest' in list_of_specifications:#above the lowest value
                 min_value = min(added_nodes_stack)
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:
                     for number in list_of_numbers:
                         delete_node(canvas, number, True)
@@ -265,7 +275,6 @@ def read_instruction(canvas):
             #Max lower
             elif 'lower' in list_of_specifications and 'uppest' in list_of_specifications:#below the uppest value
                 max_value = max(added_nodes_stack)
-                list_of_numbers = get_existing_numbers_in_range(added_nodes_stack,min_value,max_value)
                 if instruction.key_word and instruction.key_word.name == 'nodes' and instruction.number_of_times==1:
                     for number in list_of_numbers:
                         delete_node(canvas, number, True)
