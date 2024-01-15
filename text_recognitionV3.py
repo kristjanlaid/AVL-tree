@@ -270,9 +270,8 @@ sentence = 'Delete the 5 lowest nodes and add 2 nodes.'
 #sentence = 'Draw a tree with 5 nodes in range 0 to 10'
 #sentence = 'Add 5 nodes superior to 5 and inferior to 10'
 #sentence = 'Delete the 5 lowest nodes'
-sentence = 'Delete the 5 lowest nodes and add 2 nodes'
 #sentence = 'Add 1 node.'
-#sentence = 'Add a node.'
+##sentence = 'Add a node.'
 #sentence = 'Add the node 36'
 #sentence = 'add a node with a value of 42'
 #sentence = 'Add 2 nodes above the lowest node'
@@ -288,9 +287,9 @@ sentence = 'Delete the 5 lowest nodes and add 2 nodes'
 #sentence = 'Add 5 nodes inferior to 6 and superior to 2'
 #sentence = 'Add 5 nodes inferior to 6 and 2 nodes superior to 2'
 #sentence = 'Add 2 nodes between 0 and 10.'
-#sentence = 'Add 1 node superiot to 5 and 2 lower than the uppest value'
-sentence = 'Add 1 node superior to 2 and 3 nodes inferior to 4.'
-sentence = 'Add 1 node superior to 2 and 3 inferior to 4.'
+#sentence = 'Add 1 node superior to 5 and 2 lower than the uppest value'
+#sentence = 'Add 1 node superior to 2 and 3 nodes inferior to 4.'
+#sentence = 'Add 1 node superior to 2 and 3 inferior to 4.'
 #sentence = 'Add the node 10.'
 #sentence = 'Delete 10'
 def get_list_of_translated_sentence(sentence):
@@ -333,19 +332,36 @@ def get_list_of_partitionized_translated_sentence(list_of_translated_sentence):
     previous_element = list_of_translated_sentence[0]
     partitionized_translated_sentence = [previous_element]
     old_element = None
+    test_key_word = False
     old_action = previous_element
     old_specification = Specification(None,None,None)
     buffer_range = 0
     for index_element in range(1,len(list_of_translated_sentence)):
         new_element = list_of_translated_sentence[index_element]
-        if (type(old_element) == Number and (type(new_element) == Action or type(new_element) == Number) or index_element == len(list_of_translated_sentence)-1):#Correct this sentence:Add 1 node superior to 2 and 3 inferior to 4.
+        if (not test_key_word and (type(old_element) == Number and (type(new_element) == Action or type(new_element) == Specification)) or (type(new_element) == Number and index_element == len(list_of_translated_sentence)-1)) and not test_key_word:
+            test_key_word = True
             partitionized_translated_sentence.insert(len(partitionized_translated_sentence),KeyWord('nodes',False))
-        if type(new_element) == Action:
+        #if ((type(old_element) == Number and not test_key_word) and (type(new_element) == Action or type(new_element) == Number) or index_element == len(list_of_translated_sentence)-1):#Correct this sentence:Add 1 node superior to 2 and 3 inferior to 4.
+        #    test_key_word = True
+        #    partitionized_translated_sentence.insert(len(partitionized_translated_sentence),KeyWord('nodes',False))
+        if (type(new_element) == Action):
+            test_key_word = False
             buffer_range = 0
             old_action = new_element
-            list_of_partitionized_translated_sentence.append(partitionized_translated_sentence)
+            if len(partitionized_translated_sentence)>1:
+                list_of_partitionized_translated_sentence.append(partitionized_translated_sentence)
             partitionized_translated_sentence = [new_element]
+        elif (type(new_element) == KeyWord):#new_element.name == 'root')
+            test_key_word = True
+            if (new_element.name == 'root'):
+                buffer_range = 0
+                if len(partitionized_translated_sentence)>1:
+                    list_of_partitionized_translated_sentence.append(partitionized_translated_sentence)
+                partitionized_translated_sentence = [new_element]
+            else:
+                partitionized_translated_sentence.append(new_element)
         elif (type(old_element) == And and type(new_element) == Number and not (buffer_range==1 and old_specification.specification_type == 'range')):#And 34
+            test_key_word = False
             list_of_partitionized_translated_sentence.append(partitionized_translated_sentence)
             partitionized_translated_sentence = [old_action, new_element]
 
@@ -377,7 +393,10 @@ def get_list_of_instructions(sentence):#Simple with the following pattern: Actio
                     number_of_times = 1
                 instruction  = Instruction(element.action_type, None, None, [], [])
                 list_of_instructions.append(instruction)
-                
+            elif (type(element) == KeyWord and element.name == 'root'):
+                action = Action('start',False,'start')
+                instruction  = Instruction(action.action_type, None, element.name, [], [])
+                list_of_instructions.append(instruction)
             elif type(element) == Specification:
                 instruction.list_of_specifications.append(element)
                 
